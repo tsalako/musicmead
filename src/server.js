@@ -243,6 +243,10 @@ app.get("/auth/callback", async (req, res) => {
   }
 });
 
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "ok", time: new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }) });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
