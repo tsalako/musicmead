@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Holiday Music League – Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1>Holiday Music League – Admin</h1>
+      <p>View all submissions, delete rows, and sync Spotify playlists.</p>
+    </header>
+
+    <section class="card">
+      <div class="admin-actions">
+        <button id="sync-btn" class="button primary" type="button">
+          Sync playlists from submissions
+        </button>
+        <button id="logout-btn" class="button secondary tiny" type="button">
+          Logout
+        </button>
+        <span id="admin-status" class="status"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="round-title">Submissions</h2>
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Wrapped</th>
+              <th>Passing of the Peace</th>
+              <th>Worship Slaps</th>
+              <th>Created</th>
+              <th>Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <a href="index.html">← Back to submission form</a>
+      <span class="footer-sep">•</span>
+      <a href="playlists.html">View playlists</a>
+    </footer>
+  </main>
+
+  <script src="admin.js" type="module"></script>
+</body>
+</html>
