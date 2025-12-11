@@ -244,8 +244,16 @@ app.get("/auth/callback", async (req, res) => {
 });
 
 app.get("/healthz", (req, res) => {
+  console.log(`healthz-ok ${new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}`);
   res.status(200).json({ status: "ok", time: new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }) });
 });
+
+// Ping /healthz every 14 minutes to prevent sleeping
+setInterval(() => {
+  fetch("https://musicmead.onrender.com/healthz")
+    .then((res) => console.log(`[healthz] Ping success: ${res.status}`))
+    .catch((err) => console.error("[healthz] Ping failed:", err));
+}, 14 * 60 * 1000); // 14 minutes
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
