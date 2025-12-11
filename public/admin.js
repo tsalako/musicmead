@@ -6,26 +6,34 @@ const logoutBtn = document.getElementById("logout-btn");
 let adminSession = localStorage.getItem("adminSession");
 
 async function ensureAuth() {
+  // If we already have a valid session, just continue
   if (adminSession) return true;
 
+  // Prompt once; if cancelled, bail
   const pw = prompt("Enter admin password:");
   if (!pw) return false;
 
-  const res = await fetch("/api/admin/auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password: pw })
-  });
+  try {
+    const res = await fetch("/api/admin/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw })
+    });
 
-  const data = await res.json();
-  if (!res.ok) {
-    alert(data.error || "Invalid password.");
-    return ensureAuth(); // allow retry
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || "Invalid password.");
+      // Do not recurse here; we'll let the caller decide to redirect
+      return false;
+    }
+
+    adminSession = data.session;
+    localStorage.setItem("adminSession", adminSession);
+    return true;
+  } catch (err) {
+    alert("Failed to contact server. Please try again.");
+    return false;
   }
-
-  adminSession = data.session;
-  localStorage.setItem("adminSession", adminSession);
-  return true;
 }
 
 async function fetchAll() {
@@ -102,6 +110,7 @@ async function load() {
   }
 }
 
+// Handle delete clicks
 tbody.addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-id]");
   if (!btn) return;
@@ -114,7 +123,10 @@ tbody.addEventListener("click", async (e) => {
 
   try {
     const authed = await ensureAuth();
-    if (!authed) return;
+    if (!authed) {
+      window.location.href = "index.html";
+      return;
+    }
 
     btn.disabled = true;
     const res = await fetch(`/api/admin/submission/${encodeURIComponent(id)}`, {
@@ -125,7 +137,8 @@ tbody.addEventListener("click", async (e) => {
     if (!res.ok) {
       throw new Error(data.error || "Delete failed");
     }
-    statusEl.textContent = "Deleted. Remember to sync playlists to apply changes.";
+    statusEl.textContent =
+      "Deleted. Remember to sync playlists to apply changes.";
     statusEl.classList.remove("error");
     await load();
   } catch (err) {
@@ -134,13 +147,17 @@ tbody.addEventListener("click", async (e) => {
   }
 });
 
+// Handle sync button
 syncBtn.addEventListener("click", async () => {
   statusEl.textContent = "Syncing playlists…";
   statusEl.classList.remove("error");
 
   try {
     const authed = await ensureAuth();
-    if (!authed) return;
+    if (!authed) {
+      window.location.href = "index.html";
+      return;
+    }
 
     syncBtn.disabled = true;
     const res = await fetch("/api/admin/sync", {
@@ -160,12 +177,24 @@ syncBtn.addEventListener("click", async () => {
   }
 });
 
+// Logout button
 logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("adminSession");
   adminSession = null;
-  alert("Logged out. Reloading…");
-  location.reload();
+  alert("Logged out. Redirecting…");
+  window.location.href = "index.html";
 });
 
-// Initial load
-load();
+// Initial gate: force password before showing page
+(async function initAdmin() {
+  const ok = await ensureAuth();
+  if (!ok) {
+    // Kick them back to the main submission page
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Auth succeeded → show admin UI
+  document.body.classList.remove("admin-locked");
+  load();
+})();

@@ -12,6 +12,16 @@
       <p>Submit one song for each prompt. No Spotify login needed.</p>
     </header>
 
+    <!-- Countdown card -->
+    <section class="card countdown-card">
+      <div class="countdown-label">
+        Submissions close on <strong>December 27 at 10:00 PM PT</strong>
+      </div>
+      <div id="countdown-timer" class="countdown-timer">
+        <!-- filled by JS -->
+      </div>
+    </section>
+
     <section class="card">
       <label class="field-label" for="name">Your name</label>
       <div class="name-row">
@@ -31,9 +41,9 @@
     </section>
 
     <footer class="footer">
-      <a href="playlists.html">View playlists &amp; captions →</a>
-      <span class="footer-sep">•</span>
-      <a href="admin.html">Admin</a>
+      <a id="view-playlists-link" href="playlists.html">View playlists & captions →</a>
+      <span id="footer-sep" class="footer-sep">•</span>
+      <a id="admin-link" href="admin.html">Admin</a>
     </footer>
   </main>
 

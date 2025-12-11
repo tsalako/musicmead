@@ -40,6 +40,38 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
+/* Countdown card */
+
+.countdown-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.countdown-label {
+  font-size: 0.9rem;
+  color: #d6d7e4;
+}
+
+.countdown-label strong {
+  font-weight: 600;
+}
+
+.countdown-timer {
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #ffb347;
+}
+
+.countdown-timer.countdown-warning {
+  color: #ff6b8b;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(255, 107, 139, 0.5);
+}
+
 .round-title {
   margin-top: 0;
   margin-bottom: 12px;
@@ -88,7 +120,7 @@ body {
 }
 
 .result-row:hover {
-  background: #26283a;
+  background: #2d2f3e !important;
 }
 
 .result-image {
@@ -106,12 +138,13 @@ body {
 .result-title {
   font-size: 0.95rem;
   font-weight: 600;
+  color: #ffffff;       /* <-- make main title truly white */
 }
 
 .result-artist,
 .result-album {
   font-size: 0.8rem;
-  color: #9c9fb1;
+  color: #d0d2dc;       /* <-- lighter gray for readability */
 }
 
 .selected-track {
@@ -358,4 +391,9 @@ body {
   .card {
     padding: 14px 14px 16px;
   }
+}
+
+/* Hide admin UI until password is validated */
+body.admin-locked main {
+  display: none;
 }
