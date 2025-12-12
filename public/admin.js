@@ -5,9 +5,46 @@ const statusEl = document.getElementById("admin-status");
 const syncBtn = document.getElementById("sync-btn");
 const logoutBtn = document.getElementById("logout-btn");
 
+// ---- ADMIN PASSWORD FROM URL / PROMPT ----
+
+const params = new URLSearchParams(window.location.search);
+let adminPassword =
+  params.get("pw") || params.get("password") || params.get("admin");
+
+// If not in query, optionally prompt the user
+if (!adminPassword) {
+  adminPassword = window.prompt("Admin password:");
+}
+
+if (!adminPassword) {
+  alert("Admin password is required to use the admin page.");
+  window.location.href = "index.html";
+}
+
+// Clean the URL so the password is not left in the address bar
+if (params.has("pw") || params.has("password") || params.has("admin")) {
+  params.delete("pw");
+  params.delete("password");
+  params.delete("admin");
+  const newQuery = params.toString();
+  const newUrl =
+    window.location.pathname + (newQuery ? "?" + newQuery : "");
+  window.history.replaceState({}, "", newUrl);
+}
+
+// Helper: every admin-only request sends x-admin-password
+function adminFetch(url, options = {}) {
+  const headers = {
+    ...(options.headers || {}),
+    "x-admin-password": adminPassword
+  };
+  return fetch(url, { ...options, headers });
+}
+
 // ---- API HELPERS ----
 
 async function fetchAll() {
+  // submissions list is public; no admin header needed
   const res = await fetch("/api/submissions");
   if (!res.ok) {
     throw new Error("Failed to load submissions.");
@@ -84,29 +121,6 @@ async function load() {
   }
 }
 
-// ---- ADMIN ENABLED CHECK ----
-
-async function ensureAdminEnabledOrRedirect() {
-  try {
-    const res = await fetch("/api/admin/enabled");
-    if (!res.ok) throw new Error("Failed to check admin status.");
-    const data = await res.json();
-
-    if (!data.enabled) {
-      // In production, admin is disabled → bounce back to main page
-      window.location.href = "index.html";
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error("Error checking admin enabled:", err);
-    // On error, be conservative and redirect away
-    window.location.href = "index.html";
-    return false;
-  }
-}
-
 // ---- EVENT HANDLERS ----
 
 // Delete row
@@ -122,9 +136,12 @@ tbody.addEventListener("click", async (e) => {
 
   try {
     btn.disabled = true;
-    const res = await fetch(`/api/admin/submission/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
+    const res = await adminFetch(
+      `/api/admin/submission/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE"
+      }
+    );
 
     const data = await res.json();
     if (!res.ok) {
@@ -151,8 +168,8 @@ syncBtn.addEventListener("click", async () => {
 
   try {
     syncBtn.disabled = true;
-    const res = await fetch("/api/admin/sync", {
-      method: "POST",
+    const res = await adminFetch("/api/admin/sync", {
+      method: "POST"
     });
     const data = await res.json();
     if (!res.ok) {
@@ -168,7 +185,7 @@ syncBtn.addEventListener("click", async () => {
   }
 });
 
-// "Logout" -> just go back to main page now
+// "Logout" -> just go back to main page
 logoutBtn.addEventListener("click", () => {
   window.location.href = "index.html";
 });
@@ -176,10 +193,8 @@ logoutBtn.addEventListener("click", () => {
 // ---- INIT ----
 
 (async function initAdmin() {
-  const ok = await ensureAdminEnabledOrRedirect();
-  if (!ok) return;
-
-  // Admin is enabled in this environment → show UI and load data
+  // If we got this far, we have a password (or redirected away).
+  // Show the UI and load data.
   document.body.classList.remove("admin-locked");
   await load();
 })();

@@ -23,6 +23,8 @@ import {
 dotenv.config();
 
 const isProd = process.env.NODE_ENV === "production";
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "").trim();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -162,20 +164,33 @@ app.get("/api/playlist-ids", (req, res) => {
   res.json({
     wrappedId: process.env.PLAYLIST_WRAPPED_ID,
     peaceId: process.env.PLAYLIST_PEACE_ID,
-    worshipId: process.env.PLAYLIST_WORSHIP_ID,
+    worshipId: process.env.PLAYLIST_WORSHIP_ID
   });
 });
 
-
+// ---- Admin auth middleware (password-based) ----
 function requireAdmin(req, res, next) {
-  if (isProd) {
+  if (!ADMIN_PASSWORD) {
     return res
-      .status(403)
-      .json({ error: "Admin actions are disabled in production." });
+      .status(500)
+      .json({ error: "ADMIN_PASSWORD is not configured on the server." });
   }
+
+  const headerPw = req.headers["x-admin-password"];
+  const queryPw =
+    req.query.pw || req.query.password || req.query.admin || null;
+
+  const pw = headerPw || queryPw;
+
+  if (pw !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   next();
 }
 
+// Used only by the frontend to decide whether to show admin link/buttons.
+// Keeping the old behavior: enabled in non-prod only.
 app.get("/api/admin/enabled", (req, res) => {
   res.json({ enabled: !isProd });
 });
@@ -227,8 +242,17 @@ app.get("/auth/callback", async (req, res) => {
 });
 
 app.get("/healthz", (req, res) => {
-  console.log(`healthz-ok ${new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}`);
-  res.status(200).json({ status: "ok", time: new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }) });
+  console.log(
+    `healthz-ok ${new Date().toLocaleString("en-US", {
+      timeZone: "America/Los_Angeles"
+    })}`
+  );
+  res.status(200).json({
+    status: "ok",
+    time: new Date().toLocaleString("en-US", {
+      timeZone: "America/Los_Angeles"
+    })
+  });
 });
 
 // Ping /healthz every 14 minutes to prevent sleeping

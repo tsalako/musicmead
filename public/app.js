@@ -110,8 +110,8 @@ function createRound(key, config) {
       </div>
     </div>
 
-    <label class="field-label">Caption (optional)</label>
-    <textarea class="input caption-input" rows="3" placeholder="Why did you pick this?"></textarea>
+    <label class="field-label">Caption (optional, but recommended!)</label>
+    <textarea class="input caption-input" rows="3" placeholder=""></textarea>
   `;
 
   const searchInput = wrapper.querySelector(".search-input");
