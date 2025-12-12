@@ -158,37 +158,14 @@ app.get("/api/submissions", (req, res) => {
   res.json(submissions);
 });
 
-// // --- Admin auth and protected routes ---
+app.get("/api/playlist-ids", (req, res) => {
+  res.json({
+    wrappedId: process.env.PLAYLIST_WRAPPED_ID,
+    peaceId: process.env.PLAYLIST_PEACE_ID,
+    worshipId: process.env.PLAYLIST_WORSHIP_ID,
+  });
+});
 
-// const activeAdminSessions = new Set();
-
-// function createAdminSession() {
-//   return crypto.randomBytes(32).toString("hex");
-// }
-
-// app.post("/api/admin/auth", (req, res) => {
-//   const { password } = req.body;
-//   if (!password) {
-//     return res.status(400).json({ error: "Password required" });
-//   }
-
-//   const expected = process.env.ADMIN_PASSWORD;
-//   if (!expected) {
-//     return res.status(500).json({ error: "ADMIN_PASSWORD is not set on server." });
-//   }
-
-//   if (password !== expected) {
-//     return res.status(403).json({ error: "Invalid admin password" });
-//   }
-
-//   const token = createAdminSession();
-//   activeAdminSessions.add(token);
-
-//   // Auto-expire after 12 hours
-//   setTimeout(() => activeAdminSessions.delete(token), 12 * 3600 * 1000);
-
-//   res.json({ ok: true, session: token });
-// });
 
 function requireAdmin(req, res, next) {
   if (isProd) {

@@ -42,12 +42,30 @@
 
       <!-- ACTIVE PLAYLIST CONTENT -->
       <section class="playlist-section">
-        <h2 id="playlist-title" class="round-title">
-          Wrapped – Most listened to song of the year (no cheating)
-        </h2>
-        <p id="playlist-description" class="playlist-description">
-          Your most played song this year. No cheating.
-        </p>
+        <div class="playlist-section-header">
+          <div class="playlist-header-top">
+            <h2 id="playlist-title" class="round-title">Wrapped</h2>
+
+            <a
+              id="spotify-tab-link"
+              class="spotify-button"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="spotify.png"
+                alt="Open playlist on Spotify"
+                class="spotify-icon"
+              />
+              <span>Open in Spotify</span>
+            </a>
+          </div>
+
+          <p id="playlist-description" class="playlist-description">
+            Most listened to song of the year (no cheating)
+          </p>
+        </div>
 
         <div id="playlist-list" class="playlist-list">
           <!-- cards injected by playlists.js -->

@@ -351,6 +351,48 @@ body {
   }
 }
 
+.playlist-header-top {
+  display: flex;
+  align-items: center;  /* ❤️ centers title + button vertically */
+  justify-content: space-between;
+  margin-bottom: 20px; /* adds breathing room before subtitle */
+}
+
+#playlist-title {
+  line-height: 1.1; /* ensures consistent vertical centering */
+  margin: 0;        /* remove default top/bottom margins */
+}
+
+.spotify-open-btn {
+  display: inline-flex;
+  align-items: center; /* vertically centers icon & text too */
+}
+
+#playlist-description {
+  margin-top: 4px; /* tighten or loosen as needed */
+}
+.spotify-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #1DB95422; /* subtle Spotify green tint */
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.spotify-button:hover {
+  background: #1DB95433;
+}
+
+.spotify-icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* --- PLAYLIST SECTION --- */
 
 .playlist-section {

@@ -3,6 +3,7 @@ const tabs = document.querySelectorAll("[data-playlist-tab]");
 const listEl = document.getElementById("playlist-list");
 const titleEl = document.getElementById("playlist-title");
 const descEl = document.getElementById("playlist-description");
+const spotifyLinkEl = document.getElementById("spotify-tab-link");
 
 const PLAYLIST_META = {
   wrapped: {
@@ -10,8 +11,7 @@ const PLAYLIST_META = {
     description: "Most listened to song of the year (no cheating)",
   },
   peace: {
-    title:
-      "Passing of the Peace",
+    title: "Passing of the Peace",
     description: "Your chance to replace the passing of the peace music",
   },
   worship: {
@@ -25,6 +25,10 @@ let grouped = {
   peace: [],
   worship: [],
 };
+
+// Will hold playlist IDs once loaded from the server
+// Expecting shape: { wrappedId, peaceId, worshipId }
+let playlistIds = null;
 
 // ---- ADMIN LINK VISIBILITY ----
 async function updateAdminVisibility() {
@@ -42,6 +46,47 @@ async function updateAdminVisibility() {
   } catch (err) {
     adminLink.style.display = "none";
     sep.style.display = "none";
+  }
+}
+
+// ---- PLAYLIST ID LOADING ----
+// You’ll need a backend route like:
+// GET /api/playlist-ids -> { wrappedId, peaceId, worshipId }
+async function loadPlaylistIds() {
+  if (!spotifyLinkEl) return;
+
+  try {
+    const res = await fetch("/api/playlist-ids");
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+
+    // Normalize keys in case you name them slightly differently
+    playlistIds = {
+      wrapped: data.wrappedId || data.wrapped || null,
+      peace: data.peaceId || data.peace || null,
+      worship: data.worshipId || data.worship || null,
+    };
+  } catch (err) {
+    console.error("Failed to load playlist IDs:", err);
+    playlistIds = null;
+    // Hide the button if we can't get IDs
+    spotifyLinkEl.style.display = "none";
+  }
+}
+
+// Update the Spotify button URL based on the active tab
+function updateSpotifyLinkForTab(key) {
+  if (!spotifyLinkEl || !playlistIds) return;
+
+  const id = playlistIds[key];
+  if (id) {
+    spotifyLinkEl.href = `https://open.spotify.com/playlist/${id}`;
+    spotifyLinkEl.style.display = "inline-flex";
+  } else {
+    spotifyLinkEl.removeAttribute("href");
+    spotifyLinkEl.style.display = "none";
   }
 }
 
@@ -140,13 +185,15 @@ function setActiveTab(key) {
     const tabKey = tab.getAttribute("data-playlist-tab");
     tab.classList.toggle("active", tabKey === key);
   });
+
   renderPlaylist(key);
+  updateSpotifyLinkForTab(key);
 }
 
 // ---- INIT ----
 async function init() {
   updateAdminVisibility();
-  await loadSubmissions();
+  await Promise.all([loadSubmissions(), loadPlaylistIds()]);
   setActiveTab("wrapped");
 }
 
