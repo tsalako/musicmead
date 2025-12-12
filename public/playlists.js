@@ -6,17 +6,17 @@ const descEl = document.getElementById("playlist-description");
 
 const PLAYLIST_META = {
   wrapped: {
-    title: "Wrapped – Most listened to song of the year (no cheating)",
-    description: "Your most played song this year. No cheating.",
+    title: "Wrapped",
+    description: "Most listened to song of the year (no cheating)",
   },
   peace: {
     title:
-      "Passing of the Peace – Your chance to replace the passing of the peace music",
-    description: "What would you rather hear during Passing of the Peace?",
+      "Passing of the Peace",
+    description: "Your chance to replace the passing of the peace music",
   },
   worship: {
-    title: "Worship Slaps – Favorite worship song",
-    description: "The worship song that always goes way too hard.",
+    title: "Worship Slaps",
+    description: "Favorite worship song",
   },
 };
 
