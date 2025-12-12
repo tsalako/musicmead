@@ -1,3 +1,4 @@
+// Fetch prompts metadata
 const prompts = await fetch("/api/prompts").then((r) => r.json());
 
 const roundsContainer = document.getElementById("rounds-container");
@@ -10,6 +11,9 @@ const countdownEl = document.getElementById("countdown-timer");
 // December 27, 2025, 10:00 PM PT = 2025-12-28T06:00:00.000Z
 const deadline = new Date("2025-12-28T06:00:00.000Z");
 let submissionsClosed = false;
+
+// env-based admin flag (non-prod => true, prod => false)
+let adminEnabled = false;
 
 const selections = {
   wrapped: null,
@@ -25,35 +29,7 @@ function setMode(newMode) {
   submitBtn.textContent = mode === "update" ? "Update songs" : "Submit songs";
 }
 
-// Visibility helpers for footer links
-function updatePlaylistsLinkVisibility() {
-  const link = document.getElementById("view-playlists-link");
-  if (!link) return;
-
-  const adminSession = localStorage.getItem("adminSession");
-  const now = new Date();
-
-  const isClosed = now >= deadline;
-  const isAdmin = !!adminSession;
-
-  if (isClosed || isAdmin) {
-    link.style.display = "inline";
-  } else {
-    link.style.display = "none";
-  }
-
-  updateFooterSeparatorVisibility();
-}
-
-function updateAdminLinkVisibility() {
-  const adminLink = document.getElementById("admin-link");
-  if (!adminLink) return;
-
-  const adminSession = localStorage.getItem("adminSession");
-  adminLink.style.display = adminSession ? "inline" : "none";
-
-  updateFooterSeparatorVisibility();
-}
+// ----- FOOTER LINK VISIBILITY HELPERS -----
 
 function updateFooterSeparatorVisibility() {
   const sep = document.getElementById("footer-sep");
@@ -62,19 +38,56 @@ function updateFooterSeparatorVisibility() {
   const adminLink = document.getElementById("admin-link");
   const playlistsLink = document.getElementById("view-playlists-link");
 
-  const adminVisible = adminLink && adminLink.style.display !== "none";
+  const adminVisible =
+    adminLink && adminLink.style.display !== "none" && adminLink.offsetParent !== null;
   const playlistsVisible =
-    playlistsLink && playlistsLink.style.display !== "none";
+    playlistsLink &&
+    playlistsLink.style.display !== "none" &&
+    playlistsLink.offsetParent !== null;
 
-  // Show separator only if BOTH relevant links are visible
-  if (adminVisible && playlistsVisible) {
-    sep.style.display = "inline";
+  // Only show separator if BOTH links are visible
+  sep.style.display = adminVisible && playlistsVisible ? "inline" : "none";
+}
+
+function updatePlaylistsLinkVisibility() {
+  const link = document.getElementById("view-playlists-link");
+  if (!link) return;
+
+  // Visible if submissions are closed OR admin is enabled (non-prod)
+  if (submissionsClosed || adminEnabled) {
+    link.style.display = "inline";
   } else {
-    sep.style.display = "none";
+    link.style.display = "none";
   }
+
+  updateFooterSeparatorVisibility();
+}
+
+async function refreshAdminAndLinks() {
+  const adminLink = document.getElementById("admin-link");
+  if (!adminLink) return;
+
+  try {
+    const res = await fetch("/api/admin/enabled");
+    if (!res.ok) throw new Error("Failed to check admin status");
+    const data = await res.json();
+    adminEnabled = !!data.enabled;
+  } catch (err) {
+    console.error("Error checking admin enabled:", err);
+    adminEnabled = false;
+  }
+
+  // Admin link visible only if admin is enabled (i.e., non-prod)
+  adminLink.style.display = adminEnabled ? "inline" : "none";
+
+  // Playlists link depends on adminEnabled + submissionsClosed
+  updatePlaylistsLinkVisibility();
+  updateFooterSeparatorVisibility();
 }
 
 setMode("create");
+
+// ----- ROUND UI CREATION -----
 
 function createRound(key, config) {
   const wrapper = document.createElement("section");
@@ -180,6 +193,8 @@ for (const key of ["wrapped", "peace", "worship"]) {
   createRound(key, prompts[key]);
 }
 
+// ----- FORM VALIDATION & MODE -----
+
 function validateForm() {
   const name = nameInput.value.trim();
   const hasAll =
@@ -254,7 +269,8 @@ findBtn.addEventListener("click", async () => {
   }
 });
 
-// Close/lock form when deadline passed
+// ----- SUBMISSIONS CLOSED / COUNTDOWN -----
+
 function setSubmissionsClosed() {
   submissionsClosed = true;
   if (countdownEl) {
@@ -275,7 +291,6 @@ function setSubmissionsClosed() {
   updatePlaylistsLinkVisibility();
 }
 
-// Countdown timer
 function updateCountdown() {
   const now = new Date();
   const diff = deadline - now;
@@ -305,6 +320,8 @@ function updateCountdown() {
     }
   }
 }
+
+// ----- SUBMIT BUTTON -----
 
 submitBtn.addEventListener("click", async () => {
   statusEl.textContent = "";
@@ -346,6 +363,8 @@ submitBtn.addEventListener("click", async () => {
   }
 });
 
+// ----- INIT -----
+
 // Initial countdown + interval
 updateCountdown();
 setInterval(updateCountdown, 1000);
@@ -355,7 +374,5 @@ if (deadline - new Date() <= 0) {
   setSubmissionsClosed();
 }
 
-// Initial visibility for footer links
-updatePlaylistsLinkVisibility();
-updateAdminLinkVisibility();
-updateFooterSeparatorVisibility();
+// Initial link visibility: admin + playlists + separator
+refreshAdminAndLinks();

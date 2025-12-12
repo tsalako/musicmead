@@ -301,6 +301,155 @@ body {
   color: #6b6e80;
 }
 
+/* --- PLAYLIST TABS --- */
+
+.playlist-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background: #11121a;
+  border-radius: 999px;
+  border: 1px solid #25273a;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.playlist-tab {
+  flex: 1 0 auto;
+  white-space: nowrap;
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: transparent;
+  color: #c3c5d7;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.playlist-tab:hover {
+  background: #262938;
+}
+
+.playlist-tab.active {
+  background: linear-gradient(135deg, #f472b6, #a855f7);
+  color: #ffffff;
+  font-weight: 600;
+  transform: translateY(-1px);
+}
+
+/* On small screens, tabs take full width and scroll sideways if needed */
+@media (max-width: 640px) {
+  .playlist-tabs {
+    border-radius: 1rem;
+  }
+
+  .playlist-tab {
+    flex: 0 0 auto;
+  }
+}
+
+/* --- PLAYLIST SECTION --- */
+
+.playlist-section {
+  margin-top: 0.5rem;
+}
+
+.playlist-description {
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  color: #9c9fb1;
+  font-size: 0.9rem;
+}
+
+/* Single-column stacked cards */
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Card layout tuned for both desktop & mobile */
+.playlist-card {
+  background: #181924;
+  border-radius: 1rem;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.playlist-card-inner {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.playlist-card-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.playlist-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.playlist-card-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.playlist-card-artist {
+  font-size: 0.85rem;
+  color: #c3c5d7;
+}
+
+.playlist-card-meta {
+  font-size: 0.8rem;
+  color: #a5a7bd;
+}
+
+.playlist-card-submitter {
+  font-weight: 500;
+}
+
+.playlist-card-caption {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #e5e7f5;
+}
+
+/* Smaller layout on very small screens */
+@media (max-width: 640px) {
+  .playlist-card-inner {
+    align-items: flex-start;
+  }
+
+  .playlist-card-image {
+    width: 56px;
+    height: 56px;
+  }
+
+  .playlist-card {
+    padding: 0.7rem 0.8rem;
+  }
+}
+
+/* Empty state */
+.empty-state {
+  padding: 1.25rem 1rem;
+  border-radius: 0.75rem;
+  background: #171822;
+  color: #9c9fb1;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 /* Admin table */
 
 .admin-actions {

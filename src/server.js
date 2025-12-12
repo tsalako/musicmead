@@ -22,6 +22,7 @@ import {
 
 dotenv.config();
 
+const isProd = process.env.NODE_ENV === "production";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -157,45 +158,50 @@ app.get("/api/submissions", (req, res) => {
   res.json(submissions);
 });
 
-// --- Admin auth and protected routes ---
+// // --- Admin auth and protected routes ---
 
-const activeAdminSessions = new Set();
+// const activeAdminSessions = new Set();
 
-function createAdminSession() {
-  return crypto.randomBytes(32).toString("hex");
-}
+// function createAdminSession() {
+//   return crypto.randomBytes(32).toString("hex");
+// }
 
-app.post("/api/admin/auth", (req, res) => {
-  const { password } = req.body;
-  if (!password) {
-    return res.status(400).json({ error: "Password required" });
-  }
+// app.post("/api/admin/auth", (req, res) => {
+//   const { password } = req.body;
+//   if (!password) {
+//     return res.status(400).json({ error: "Password required" });
+//   }
 
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) {
-    return res.status(500).json({ error: "ADMIN_PASSWORD is not set on server." });
-  }
+//   const expected = process.env.ADMIN_PASSWORD;
+//   if (!expected) {
+//     return res.status(500).json({ error: "ADMIN_PASSWORD is not set on server." });
+//   }
 
-  if (password !== expected) {
-    return res.status(403).json({ error: "Invalid admin password" });
-  }
+//   if (password !== expected) {
+//     return res.status(403).json({ error: "Invalid admin password" });
+//   }
 
-  const token = createAdminSession();
-  activeAdminSessions.add(token);
+//   const token = createAdminSession();
+//   activeAdminSessions.add(token);
 
-  // Auto-expire after 12 hours
-  setTimeout(() => activeAdminSessions.delete(token), 12 * 3600 * 1000);
+//   // Auto-expire after 12 hours
+//   setTimeout(() => activeAdminSessions.delete(token), 12 * 3600 * 1000);
 
-  res.json({ ok: true, session: token });
-});
+//   res.json({ ok: true, session: token });
+// });
 
 function requireAdmin(req, res, next) {
-  const token = req.headers["x-admin-session"];
-  if (!token || !activeAdminSessions.has(token)) {
-    return res.status(403).json({ error: "Unauthorized admin access" });
+  if (isProd) {
+    return res
+      .status(403)
+      .json({ error: "Admin actions are disabled in production." });
   }
   next();
 }
+
+app.get("/api/admin/enabled", (req, res) => {
+  res.json({ enabled: !isProd });
+});
 
 // Delete a submission by id
 app.delete("/api/admin/submission/:id", requireAdmin, (req, res) => {
